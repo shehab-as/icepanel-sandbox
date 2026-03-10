@@ -1,0 +1,24 @@
+name: Synchronise Landscape
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  synchronise-landscape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Import landscape to IcePanel
+        run: |
+          curl -sf -X POST "https://api.icepanel.io/v1/landscapes/${ICEPANEL_LANDSCAPE_ID}/versions/latest/import" \
+            -H "X-API-Key: ${ICEPANEL_API_KEY}" \
+            -H "Content-Type: application/yaml" \
+            --data-binary @icepanel-landscape-import.yaml
+        env:
+          ICEPANEL_LANDSCAPE_ID: ${{ secrets.ICEPANEL_LANDSCAPE_ID }}
+          ICEPANEL_API_KEY: ${{ secrets.ICEPANEL_API_KEY }}

@@ -1,0 +1,30 @@
+name: Generate IcePanel share link
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  share-link:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create share link
+        run: |
+          RESPONSE=$(curl -s -X POST "https://api.icepanel.io/v1/landscapes/${ICEPANEL_LANDSCAPE_ID}/versions/latest/share-link" \
+            -H "X-API-Key: ${ICEPANEL_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{"protected": false}')
+          URL=$(echo $RESPONSE | jq -r '.url // empty')
+          if [ -z "$URL" ]; then
+            RESPONSE=$(curl -sf -X GET "https://api.icepanel.io/v1/landscapes/${ICEPANEL_LANDSCAPE_ID}/versions/latest/share-link" \
+              -H "X-API-Key: ${ICEPANEL_API_KEY}")
+            URL=$(echo $RESPONSE | jq -r '.url')
+            echo "Share link (existing): $URL"
+          else
+            echo "Share link (created): $URL"
+          fi
+        env:
+          ICEPANEL_LANDSCAPE_ID: ${{ secrets.ICEPANEL_LANDSCAPE_ID }}
+          ICEPANEL_API_KEY: ${{ secrets.ICEPANEL_API_KEY }}

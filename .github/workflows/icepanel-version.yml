@@ -1,0 +1,21 @@
+name: Snapshot IcePanel architecture
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  snapshot-architecture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create version snapshot
+        run: |
+          curl -sf -X POST "https://api.icepanel.io/v1/landscapes/${{ vars.ICEPANEL_LANDSCAPE_ID }}/versions" \
+            -H "X-API-Key: ${{ secrets.ICEPANEL_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "${{ github.ref_name }}",
+              "notes": "Automated snapshot from release ${{ github.ref_name }}",
+              "modelHandleId": "${{ vars.ICEPANEL_MODEL_HANDLE_ID }}"
+            }'
